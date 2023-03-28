@@ -33,7 +33,9 @@ class _C4Feature4State extends State<C4Feature4> {
             shrinkWrap: true,
             padding: const EdgeInsets.all(16),
             children: const [
+              Text("Using video_player", textAlign: TextAlign.center,),
               MyVideoPlayer(),
+              Text("Using youtube_player_flutter", textAlign: TextAlign.center,),
               MyYoutubePlayer(),
             ],
           ),
@@ -177,7 +179,6 @@ class _MyYoutubePlayerState extends State<MyYoutubePlayer> {
           const SizedBox(
             height: 8,
           ),
-          const Text("Using youtube_player_flutter"),
           const SizedBox(
             height: 8,
           ),
