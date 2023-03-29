@@ -1,4 +1,5 @@
 import 'package:bt_c3/main.dart';
+import 'package:bt_c3/movie_finder/ui/page/movie_detail_page.dart';
 import 'package:bt_c3/movie_finder/ui/widget/app_bar.dart';
 import 'package:bt_c3/movie_finder/ui/widget/bottom_navigation_bar.dart';
 import 'package:bt_c3/movie_finder/ui/widget/movie_carousel.dart';
@@ -8,9 +9,14 @@ import 'package:bt_c3/movie_finder/ui/widget/search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:scaffold_gradient_background/scaffold_gradient_background.dart';
 
-class MovieFinder extends StatelessWidget {
+class MovieFinder extends StatefulWidget {
   const MovieFinder({Key? key}) : super(key: key);
 
+  @override
+  State<MovieFinder> createState() => _MovieFinderState();
+}
+
+class _MovieFinderState extends State<MovieFinder> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldGradientBackground(
