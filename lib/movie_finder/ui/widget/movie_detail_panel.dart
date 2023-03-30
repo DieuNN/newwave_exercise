@@ -8,6 +8,7 @@ import 'package:bt_c3/movie_finder/ui/widget/caster_card.dart';
 import 'package:bt_c3/movie_finder/ui/widget/category_chip.dart';
 import 'package:bt_c3/movie_finder/ui/widget/imdb_tag.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:readmore/readmore.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:http/http.dart' as http;
@@ -251,11 +252,15 @@ class MovieDetailPanel extends StatelessWidget {
         if (snapshot.hasData) {
           return Row(
             children: [
-              snapshot.data!.genres!
-                  .map((item) => CategoryChip(category: item.name ?? "Unknown"))
-                  .toList()
-                  .first,
-              CategoryChip(category: "+${movie.genreIds!.length - 1}"),
+              // Todo: Find by category?
+              CategoryChip(
+                category: snapshot.data!.genres!.first.name ?? "Unknown",
+                onChipTap: () {},
+              ),
+              CategoryChip(
+                category: "+${movie.genreIds!.length - 1}",
+                onChipTap: ()=> showAllCategoriesDialog(context, snapshot),
+              ),
             ],
           );
         }
@@ -263,6 +268,44 @@ class MovieDetailPanel extends StatelessWidget {
           width: 0,
         );
       },
+    );
+  }
+
+  void showAllCategoriesDialog(BuildContext context,AsyncSnapshot<MoviePrimaryInfoApiResponse?> snapshot) {
+    showAnimatedDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          insetPadding: EdgeInsets.zero,
+          shape:  const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          content: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [HexColor.fromHex("2B5876"), HexColor.fromHex("4E4376")],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(32)),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Wrap(
+              spacing: 20,
+              children: snapshot.data!.genres!
+                  .map(
+                    (item) =>
+                    CategoryChip(category: item.name!),
+              )
+                  .toList(),
+            ),
+          ),
+        );
+      },
+      animationType: DialogTransitionType.size,
+      curve: Curves.fastOutSlowIn,
+      duration: const Duration(milliseconds: 500),
     );
   }
 }
