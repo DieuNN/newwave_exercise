@@ -1,4 +1,5 @@
 import 'package:bt_c3/movie_finder/ui/widget/movie_detail_panel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
