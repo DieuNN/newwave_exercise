@@ -52,6 +52,8 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   readmore: ^2.2.0
   test: ^1.22.0
+  http: ^0.13.5
+  shimmer: ^2.0.0
 
 dev_dependencies:
   flutter_test:

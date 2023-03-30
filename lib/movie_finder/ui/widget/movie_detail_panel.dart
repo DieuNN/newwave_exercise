@@ -1,21 +1,51 @@
+import 'dart:convert';
+
 import 'package:bt_c3/main.dart';
+import 'package:bt_c3/movie_finder/model/movie_cast_api_response.dart';
+import 'package:bt_c3/movie_finder/model/movie_primary_info_api_response.dart';
+import 'package:bt_c3/movie_finder/movie_constants.dart';
 import 'package:bt_c3/movie_finder/ui/widget/caster_card.dart';
 import 'package:bt_c3/movie_finder/ui/widget/category_chip.dart';
 import 'package:bt_c3/movie_finder/ui/widget/imdb_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:http/http.dart' as http;
+
+import '../../model/movie.dart';
 
 class MovieDetailPanel extends StatelessWidget {
+  final Movie movie;
+
   const MovieDetailPanel(
-      {Key? key, required this.scrollController, required this.panelController})
+      {Key? key,
+      required this.scrollController,
+      required this.panelController,
+      required this.movie})
       : super(key: key);
   final ScrollController scrollController;
   final PanelController panelController;
 
-
   @override
   Widget build(BuildContext context) {
+    Future<MoviePrimaryInfoApiResponse?> moviePrimaryInfoApiResponse =
+        Future(() async {
+      final response = await http.get(Uri.parse(
+          "https://api.themoviedb.org/3/movie/${movie.id}?api_key=${MovieFinderConstants.apiKey}&language=en-US"));
+      if (response.statusCode == 200) {
+        return MoviePrimaryInfoApiResponse.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    });
+
+    Future<MovieCastApiResponse?> movieCastApiResponse = Future(() async {
+      final response = await http.get(Uri.parse(
+          "https://api.themoviedb.org/3/movie/${movie.id}/credits?api_key=${MovieFinderConstants.apiKey}"));
+      if (response.statusCode == 200) {
+        return MovieCastApiResponse.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    });
     return Container(
       // height: MediaQuery.of(context).size,
       height: 1,
@@ -38,32 +68,11 @@ class MovieDetailPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Center(
-                child: SizedBox(
-                  width: 30,
-                  height: 5,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
+              slideUpButton(),
               const SizedBox(
                 height: 16,
               ),
-              const Center(
-                child: Text(
-                  "this is a long line",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 60,
-                    fontFamily: "BeVietnamPro",
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              title(),
               const SizedBox(
                 height: 28,
               ),
@@ -71,55 +80,26 @@ class MovieDetailPanel extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    children: const [
-                      CategoryChip(category: "Action"),
-                      SizedBox(
+                    children: [
+                      categoryTags(moviePrimaryInfoApiResponse),
+                      const SizedBox(
                         width: 10,
                       ),
-                      CategoryChip(category: "+20"),
-                      SizedBox(
+                      imdbTag(),
+                      const SizedBox(
                         width: 10,
-                      ),
-                      ImdbTag(
-                        imdbScore: 10,
-                        width: 64,
-                        height: 32,
-                        fontSize: 12,
                       ),
                     ],
                   ),
                   Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.share_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.favorite_border,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                    children: shareButtons(),
                   ),
                 ],
               ),
               const SizedBox(
                 height: 8,
               ),
-              const ReadMoreText(
-                "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-                trimLines: 3,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontFamily: "BeVietnamPro",
-                ),
-              ),
+              descriptionText(),
               const SizedBox(
                 height: 20,
               ),
@@ -148,22 +128,141 @@ class MovieDetailPanel extends StatelessWidget {
               const SizedBox(
                 height: 16,
               ),
-              Center(
-                child: Wrap(
-                  spacing: 20,
-                  children: List.filled(
-                    5,
-                    const MovieFinderCasterCard(
-                        source: "assets/images/img_1.jpg",
-                        actorName: "Actor name",
-                        characterName: "Character"),
-                  ).toList(),
-                ),
-              ),
+              castingGrid(movieCastApiResponse),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget slideUpButton() {
+    return const Center(
+      child: SizedBox(
+        width: 30,
+        height: 5,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.grey,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget title() {
+    return Center(
+      child: Text(
+        movie.title ?? "Unknown",
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 60,
+          fontFamily: "BeVietnamPro",
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> shareButtons() {
+    return [
+      IconButton(
+        onPressed: () {},
+        icon: const Icon(
+          Icons.share_outlined,
+          color: Colors.white,
+        ),
+      ),
+      IconButton(
+        onPressed: () {},
+        icon: const Icon(
+          Icons.favorite_border,
+          color: Colors.white,
+        ),
+      )
+    ];
+  }
+
+  Widget imdbTag() {
+    return ImdbTag(
+      imdbScore: movie.voteAverage ?? 0.0,
+      width: 64,
+      height: 32,
+      fontSize: 12,
+    );
+  }
+
+  Widget castingGrid(Future<MovieCastApiResponse?> movieCastApiResponse) {
+    return FutureBuilder(
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const SizedBox(
+            height: 0,
+          );
+        }
+        if (snapshot.hasData) {
+          return Center(
+            child: Wrap(
+              spacing: 20,
+              children: snapshot.data!.cast!
+                  .take(10)
+                  .map(
+                    (e) => MovieFinderCasterCard(
+                      source: e.profilePath,
+                      actorName: e.name ?? "No name",
+                      characterName: e.character ?? "Unknown",
+                    ),
+                  )
+                  .toList(),
+            ),
+          );
+        }
+        return const SizedBox(
+          height: 0,
+        );
+      },
+      future: movieCastApiResponse,
+    );
+  }
+
+  Widget descriptionText() {
+    return ReadMoreText(
+      movie.overview ?? "No description provided!",
+      trimLines: 3,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 12,
+        fontFamily: "BeVietnamPro",
+      ),
+    );
+  }
+
+  Widget categoryTags(
+      Future<MoviePrimaryInfoApiResponse?> moviePrimaryInfoApiResponse) {
+    return FutureBuilder(
+      future: moviePrimaryInfoApiResponse,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const SizedBox(
+            width: 0,
+          );
+        }
+        if (snapshot.hasData) {
+          return Row(
+            children: [
+              snapshot.data!.genres!
+                  .map((item) => CategoryChip(category: item.name ?? "Unknown"))
+                  .toList()
+                  .first,
+              CategoryChip(category: "+${movie.genreIds!.length - 1}"),
+            ],
+          );
+        }
+        return const SizedBox(
+          width: 0,
+        );
+      },
     );
   }
 }
