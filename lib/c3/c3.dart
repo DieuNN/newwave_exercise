@@ -12,7 +12,14 @@ class C3Screen extends StatefulWidget {
 final isRefreshed = ValueNotifier<bool>(false);
 
 class _C3ScreenState extends State<C3Screen> {
-
+  Future<void> _refresh() async {
+    return Future.delayed(
+      const Duration(seconds: 1),
+      () {
+        isRefreshed.value = !isRefreshed.value;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,50 +39,9 @@ class _C3ScreenState extends State<C3Screen> {
           bool isLightTheme = value == ThemeMode.light;
           return Scaffold(
             backgroundColor: isLightTheme ? Colors.white : Colors.black,
-            appBar: AppBar(
-              title: Text(
-                "Salad",
-                style: TextStyle(
-                    color: isLightTheme ? Colors.black : Colors.white),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    if (kDebugMode) {
-                      print(notifier.value);
-                    }
-                    if (notifier.value == ThemeMode.light) {
-                      notifier.value = ThemeMode.dark;
-                    } else {
-                      notifier.value = ThemeMode.light;
-                    }
-                  },
-                  icon: Icon(
-                    Icons.search,
-                    color: isLightTheme ? Colors.black : Colors.white,
-                  ),
-                )
-              ],
-              backgroundColor: isLightTheme ? Colors.white : Colors.black,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                color: isLightTheme ? Colors.black : Colors.white,
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              elevation: 0,
-              shadowColor: Colors.transparent,
-            ),
+            appBar: _appBar(isLightTheme),
             body: RefreshIndicator(
-              onRefresh: () {
-                return Future.delayed(
-                  const Duration(seconds: 1),
-                  () {
-                    isRefreshed.value = !isRefreshed.value;
-                  },
-                );
-              },
+              onRefresh: () => _refresh(),
               child: ListView(
                 shrinkWrap: true,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -88,45 +54,7 @@ class _C3ScreenState extends State<C3Screen> {
                   const SizedBox(
                     height: 8,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        "Sort by",
-                        style: TextStyle(
-                            color: isLightTheme ? Colors.black : Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22),
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Most popular",
-                            style: TextStyle(
-                                color: Color.fromRGBO(245, 66, 120, 1),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18),
-                          ),
-                          const SizedBox(
-                            width: 8,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.swap_vert),
-                            iconSize: 18,
-                            color: const Color.fromRGBO(245, 66, 120, 1),
-                            constraints: const BoxConstraints(
-                              maxHeight: 36,
-                              maxWidth: 36,
-                            ),
-                            splashRadius: 12,
-                            onPressed: () {},
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
+                  _sortByWidget(isLightTheme),
                   Container(
                     child: gridView(items: saladItems),
                   )
@@ -135,6 +63,85 @@ class _C3ScreenState extends State<C3Screen> {
             ),
           );
         });
+  }
+
+  _appBar(isLightTheme) {
+    return AppBar(
+      title: Text(
+        "Salad",
+        style: TextStyle(color: isLightTheme ? Colors.black : Colors.white),
+      ),
+      actions: [
+        IconButton(
+          onPressed: () {
+            if (kDebugMode) {
+              print(notifier.value);
+            }
+            if (notifier.value == ThemeMode.light) {
+              notifier.value = ThemeMode.dark;
+            } else {
+              notifier.value = ThemeMode.light;
+            }
+          },
+          icon: Icon(
+            Icons.search,
+            color: isLightTheme ? Colors.black : Colors.white,
+          ),
+        )
+      ],
+      backgroundColor: isLightTheme ? Colors.white : Colors.black,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        color: isLightTheme ? Colors.black : Colors.white,
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+      elevation: 0,
+      shadowColor: Colors.transparent,
+    );
+  }
+
+  _sortByWidget(isLightTheme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Text(
+          "Sort by",
+          style: TextStyle(
+              color: isLightTheme ? Colors.black : Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 22),
+        ),
+        Row(
+          children: [
+            const Text(
+              "Most popular",
+              style: TextStyle(
+                  color: Color.fromRGBO(245, 66, 120, 1),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            IconButton(
+              icon: const Icon(Icons.swap_vert),
+              iconSize: 18,
+              color: const Color.fromRGBO(245, 66, 120, 1),
+              constraints: const BoxConstraints(
+                maxHeight: 36,
+                maxWidth: 36,
+              ),
+              splashRadius: 12,
+              onPressed: () {},
+            )
+          ],
+        ),
+      ],
+    );
   }
 }
 
@@ -248,7 +255,7 @@ Widget bookmarkIcon() {
             color: (value) ? Colors.red : Colors.yellow,
           ),
           child: IconButton(
-            icon:  Icon(
+            icon: Icon(
               value ? Icons.bookmark : Icons.search,
               color: Colors.white,
             ),
