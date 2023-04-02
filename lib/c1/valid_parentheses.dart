@@ -40,7 +40,7 @@ bool isValid(String s) {
   return false;
 }
 
-// Dart doesn't has Stack like Java or C++
+// Dart doesn't have Stack like Java or C++
 class Stack<E> {
   final List<E> _list = [];
   void push(E value) {
