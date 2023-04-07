@@ -4,18 +4,20 @@ import 'package:bt_c3/main.dart';
 import 'package:bt_c3/movie_finder/model/movie_cast_api_response.dart';
 import 'package:bt_c3/movie_finder/model/movie_primary_info_api_response.dart';
 import 'package:bt_c3/movie_finder/movie_constants.dart';
+import 'package:bt_c3/movie_finder/movie_finder_provider.dart';
 import 'package:bt_c3/movie_finder/ui/widget/caster_card.dart';
 import 'package:bt_c3/movie_finder/ui/widget/category_chip.dart';
 import 'package:bt_c3/movie_finder/ui/widget/imdb_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:readmore/readmore.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:http/http.dart' as http;
 
 import '../../model/movie.dart';
 
-class MovieDetailPanel extends StatelessWidget {
+class MovieDetailPanel extends StatefulWidget {
   final Movie movie;
 
   const MovieDetailPanel(
@@ -28,116 +30,152 @@ class MovieDetailPanel extends StatelessWidget {
   final PanelController panelController;
 
   @override
-  Widget build(BuildContext context) {
-    Future<MoviePrimaryInfoApiResponse?> moviePrimaryInfoApiResponse =
-        Future(() async {
-      final response = await http.get(Uri.parse(
-          "https://api.themoviedb.org/3/movie/${movie.id}?api_key=${MovieFinderConstants.apiKey}&language=en-US"));
-      if (response.statusCode == 200) {
-        return MoviePrimaryInfoApiResponse.fromJson(jsonDecode(response.body));
-      }
-      return null;
-    });
+  State<MovieDetailPanel> createState() => _MovieDetailPanelState();
+}
 
-    Future<MovieCastApiResponse?> movieCastApiResponse = Future(() async {
-      final response = await http.get(Uri.parse(
-          "https://api.themoviedb.org/3/movie/${movie.id}/credits?api_key=${MovieFinderConstants.apiKey}"));
-      if (response.statusCode == 200) {
-        return MovieCastApiResponse.fromJson(jsonDecode(response.body));
-      }
-      return null;
-    });
-    return Container(
-      // height: MediaQuery.of(context).size,
-      height: 1,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [HexColor.fromHex("2B5876"), HexColor.fromHex("4E4376")],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-      ),
-      child: SingleChildScrollView(
-        controller: scrollController,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 30, right: 30, top: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              slideUpButton(),
-              const SizedBox(
-                height: 16,
+class _MovieDetailPanelState extends State<MovieDetailPanel> {
+  @override
+  void initState() {
+    Provider.of<MovieFinderProvider>(context, listen: false)
+        .loadCast(widget.movie);
+    Provider.of<MovieFinderProvider>(context, listen: false)
+        .loadCategory(widget.movie);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // if not loaded
+        if (!Provider.of<MovieFinderProvider>(context, listen: true)
+                .isMovieCastLoaded ||
+            !Provider.of<MovieFinderProvider>(context, listen: true)
+                .isMoviePrimaryInfoLoaded ||
+            Provider.of<MovieFinderProvider>(context, listen: true)
+                    .moviePrimaryInfoApiResult ==
+                null ||
+            Provider.of<MovieFinderProvider>(context, listen: true)
+                    .movieCastApiResult ==
+                null) {
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  HexColor.fromHex("2B5876"),
+                  HexColor.fromHex("4E4376")
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
-              title(),
-              const SizedBox(
-                height: 28,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
+            child: Column(
+              children: const [
+                Center(child: CircularProgressIndicator()),
+              ],
+            ),
+          );
+        }
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [HexColor.fromHex("2B5876"), HexColor.fromHex("4E4376")],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          child: SingleChildScrollView(
+            controller: widget.scrollController,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 30, right: 30, top: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  _buildSlideUpButton(),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  _buildTitle(),
+                  const SizedBox(
+                    height: 28,
+                  ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      categoryTags(moviePrimaryInfoApiResponse),
-                      const SizedBox(
-                        width: 10,
+                      Row(
+                        children: [
+                          _buildCategoryTags(
+                              context
+                                  .watch<MovieFinderProvider>()
+                                  .moviePrimaryInfoApiResult!,
+                              context),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          _buildImdbTag(),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                        ],
                       ),
-                      imdbTag(),
-                      const SizedBox(
-                        width: 10,
+                      Row(
+                        children: _buildShareButtons(),
                       ),
                     ],
                   ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  _buildDescriptionText(),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   Row(
-                    children: shareButtons(),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text(
+                        "Cast",
+                        style: TextStyle(
+                          fontFamily: 'BeVietnamPro',
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "See all",
+                        style: TextStyle(
+                          fontFamily: 'BeVietnamPro',
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  _buildCastingGrid(
+                      context.watch<MovieFinderProvider>().movieCastApiResult!),
                 ],
               ),
-              const SizedBox(
-                height: 8,
-              ),
-              descriptionText(),
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    "Cast",
-                    style: TextStyle(
-                      fontFamily: 'BeVietnamPro',
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    "See all",
-                    style: TextStyle(
-                      fontFamily: 'BeVietnamPro',
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              castingGrid(movieCastApiResponse),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  Widget slideUpButton() {
+  Widget _buildSlideUpButton() {
     return const Center(
       child: SizedBox(
         width: 30,
@@ -151,10 +189,10 @@ class MovieDetailPanel extends StatelessWidget {
     );
   }
 
-  Widget title() {
+  Widget _buildTitle() {
     return Center(
       child: Text(
-        movie.title ?? "Unknown",
+        widget.movie.title ?? "Unknown",
         textAlign: TextAlign.center,
         style: const TextStyle(
           fontSize: 60,
@@ -166,7 +204,7 @@ class MovieDetailPanel extends StatelessWidget {
     );
   }
 
-  List<Widget> shareButtons() {
+  List<Widget> _buildShareButtons() {
     return [
       IconButton(
         onPressed: () {},
@@ -185,51 +223,36 @@ class MovieDetailPanel extends StatelessWidget {
     ];
   }
 
-  Widget imdbTag() {
+  Widget _buildImdbTag() {
     return ImdbTag(
-      imdbScore: movie.voteAverage ?? 0.0,
+      imdbScore: widget.movie.voteAverage ?? 0.0,
       width: 64,
       height: 32,
       fontSize: 12,
     );
   }
 
-  Widget castingGrid(Future<MovieCastApiResponse?> movieCastApiResponse) {
-    return FutureBuilder(
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const SizedBox(
-            height: 0,
-          );
-        }
-        if (snapshot.hasData) {
-          return Center(
-            child: Wrap(
-              spacing: 20,
-              children: snapshot.data!.cast!
-                  .take(10)
-                  .map(
-                    (e) => MovieFinderCasterCard(
-                      source: e.profilePath,
-                      actorName: e.name ?? "No name",
-                      characterName: e.character ?? "Unknown",
-                    ),
-                  )
-                  .toList(),
-            ),
-          );
-        }
-        return const SizedBox(
-          height: 0,
-        );
-      },
-      future: movieCastApiResponse,
+  Widget _buildCastingGrid(MovieCastApiResponse movieCastApiResult) {
+    return Center(
+      child: Wrap(
+        spacing: 20,
+        children: movieCastApiResult.cast!
+            .take(10)
+            .map(
+              (e) => MovieFinderCasterCard(
+                source: e.profilePath,
+                actorName: e.name ?? "No name",
+                characterName: e.character ?? "Unknown",
+              ),
+            )
+            .toList(),
+      ),
     );
   }
 
-  Widget descriptionText() {
+  Widget _buildDescriptionText() {
     return ReadMoreText(
-      movie.overview ?? "No description provided!",
+      widget.movie.overview ?? "No description provided!",
       trimLines: 3,
       style: const TextStyle(
         color: Colors.white,
@@ -239,39 +262,26 @@ class MovieDetailPanel extends StatelessWidget {
     );
   }
 
-  Widget categoryTags(
-      Future<MoviePrimaryInfoApiResponse?> moviePrimaryInfoApiResponse) {
-    return FutureBuilder(
-      future: moviePrimaryInfoApiResponse,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const SizedBox(
-            width: 0,
-          );
-        }
-        if (snapshot.hasData) {
-          return Row(
-            children: [
-              // Todo: Find by category?
-              CategoryChip(
-                category: snapshot.data!.genres!.first.name ?? "Unknown",
-                onChipTap: () {},
-              ),
-              CategoryChip(
-                category: "+${movie.genreIds!.length - 1}",
-                onChipTap: ()=> showAllCategoriesDialog(context, snapshot),
-              ),
-            ],
-          );
-        }
-        return const SizedBox(
-          width: 0,
-        );
-      },
+  Widget _buildCategoryTags(
+      MoviePrimaryInfoApiResponse moviePrimaryInfoApiResult, context) {
+    return Row(
+      children: [
+        // Todo: Find by category?
+        CategoryChip(
+          category: moviePrimaryInfoApiResult.genres!.first.name ?? "Unknown",
+          onChipTap: () {},
+        ),
+        CategoryChip(
+          category: "+${widget.movie.genreIds!.length - 1}",
+          onChipTap: () =>
+              _showAllCategoriesDialog(context, moviePrimaryInfoApiResult),
+        ),
+      ],
     );
   }
 
-  void showAllCategoriesDialog(BuildContext context,AsyncSnapshot<MoviePrimaryInfoApiResponse?> snapshot) {
+  void _showAllCategoriesDialog(
+      BuildContext context, MoviePrimaryInfoApiResponse categories) {
     showAnimatedDialog(
       context: context,
       barrierDismissible: true,
@@ -279,12 +289,15 @@ class MovieDetailPanel extends StatelessWidget {
         return AlertDialog(
           contentPadding: EdgeInsets.zero,
           insetPadding: EdgeInsets.zero,
-          shape:  const RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(32.0))),
           content: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [HexColor.fromHex("2B5876"), HexColor.fromHex("4E4376")],
+                colors: [
+                  HexColor.fromHex("2B5876"),
+                  HexColor.fromHex("4E4376")
+                ],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -293,11 +306,10 @@ class MovieDetailPanel extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Wrap(
               spacing: 20,
-              children: snapshot.data!.genres!
+              children: categories.genres!
                   .map(
-                    (item) =>
-                    CategoryChip(category: item.name!),
-              )
+                    (item) => CategoryChip(category: item.name!),
+                  )
                   .toList(),
             ),
           ),
