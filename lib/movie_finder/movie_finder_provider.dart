@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class MovieFinderProvider extends ChangeNotifier {
-  MovieApiResponse? movieApiResponseResult;
+  MovieApiResponse? movieApiResult;
   MovieCastApiResponse? movieCastApiResult;
   MoviePrimaryInfoApiResponse? moviePrimaryInfoApiResult;
   var isMovieApiLoaded = false;
@@ -59,8 +59,9 @@ class MovieFinderProvider extends ChangeNotifier {
   }
 
   void loadMovies() async {
-    log("Loading movies");
+
     try {
+      log("Loading movies");
       Future<MovieApiResponse?> movieResponseFuture = Future(() async {
         var response = await http.get(Uri.parse(
             "https://api.themoviedb.org/3/discover/movie?api_key=${MovieFinderConstants.apiKey}&page=1"));
@@ -72,7 +73,8 @@ class MovieFinderProvider extends ChangeNotifier {
           return null;
         }
       });
-      movieApiResponseResult = await movieResponseFuture;
+      log("Loaded  movies");
+      movieApiResult = await movieResponseFuture;
       isMovieApiLoaded = true;
       notifyListeners();
     } catch (e) {

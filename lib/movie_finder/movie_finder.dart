@@ -25,15 +25,15 @@ class _MovieFinderState extends State<MovieFinder> {
 
   @override
   Widget build(BuildContext context) {
-
-    if (!Provider.of<MovieFinderProvider>(context, listen: false).isMovieApiLoaded ||
-        Provider.of<MovieFinderProvider>(context, listen: false).movieApiResponseResult == null) {
+    if (!context.watch<MovieFinderProvider>().isMovieApiLoaded &&
+        context.watch<MovieFinderProvider>().movieApiResult == null) {
       return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            CircularProgressIndicator(),
-          ]);
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator(),
+        ],
+      );
     }
     return ScaffoldGradientBackground(
       gradient: LinearGradient(
@@ -78,7 +78,7 @@ class _MovieFinderState extends State<MovieFinder> {
               key: UniqueKey(),
               movieList: context
                   .watch<MovieFinderProvider>()
-                  .movieApiResponseResult!
+                  .movieApiResult!
                   .results!
                   .take(10)
                   .toList(),
@@ -108,7 +108,7 @@ class _MovieFinderState extends State<MovieFinder> {
             MovieCarousel(
               movieList: context
                   .watch<MovieFinderProvider>()
-                  .movieApiResponseResult!
+                  .movieApiResult!
                   .results!
                   .take(10)
                   .toList(),
