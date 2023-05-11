@@ -34,6 +34,7 @@ class MovieFinderProvider extends ChangeNotifier {
       isMoviePrimaryInfoLoaded = true;
       notifyListeners();
     } catch (e) {
+      log("Error on loading cast");
       log(e.toString());
       notifyListeners();
     }
@@ -54,12 +55,12 @@ class MovieFinderProvider extends ChangeNotifier {
       isMovieCastLoaded = true;
       notifyListeners();
     } catch (e) {
+      log("Error on loading category");
       log(e.toString());
     }
   }
 
   void loadMovies() async {
-
     try {
       log("Loading movies");
       Future<MovieApiResponse?> movieResponseFuture = Future(() async {
@@ -68,18 +69,19 @@ class MovieFinderProvider extends ChangeNotifier {
         if (response.statusCode == 200) {
           var movieApiResponse =
               MovieApiResponse.fromJson(jsonDecode(response.body));
-          return movieApiResponse..results!.take(10);
+          return movieApiResponse..results!;
         } else {
           return null;
         }
       });
-      log("Loaded  movies");
+
       movieApiResult = await movieResponseFuture;
+      log("Loaded  movies");
       isMovieApiLoaded = true;
       notifyListeners();
     } catch (e) {
       log(e.toString());
-      isMovieApiLoaded = true;
+      log("Error on loading movie");
       notifyListeners();
     }
   }

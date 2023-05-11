@@ -1,10 +1,12 @@
+import 'dart:developer';
+
 import 'package:bt_c3/movie_finder/model/movie.dart';
 
 class MovieApiResponse {
-  int? page;
+  num? page;
   List<Movie>? results;
-  int? totalPages;
-  int? totalResults;
+  num? totalPages;
+  num? totalResults;
 
   MovieApiResponse(
       {this.page, this.results, this.totalPages, this.totalResults});
@@ -19,6 +21,7 @@ class MovieApiResponse {
     }
     totalPages = json['total_pages'];
     totalResults = json['total_results'];
+    log("Done parse json");
   }
 
   Map<String, dynamic> toJson() {

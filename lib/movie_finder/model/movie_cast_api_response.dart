@@ -1,5 +1,5 @@
 class MovieCastApiResponse {
-  int? id;
+  num? id;
   List<_Cast>? cast;
   List<_Crew>? crew;
 
@@ -36,17 +36,17 @@ class MovieCastApiResponse {
 
 class _Cast {
   bool? adult;
-  int? gender;
-  int? id;
+  num? gender;
+  num? id;
   String? knownForDepartment;
   String? name;
   String? originalName;
   double? popularity;
   String? profilePath;
-  int? castId;
+  num? castId;
   String? character;
   String? creditId;
-  int? order;
+  num? order;
 
   _Cast();
 
@@ -66,7 +66,7 @@ class _Cast {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['adult'] = adult;
     data['gender'] = gender;
     data['id'] = id;
@@ -85,8 +85,8 @@ class _Cast {
 
 class _Crew {
   bool? adult;
-  int? gender;
-  int? id;
+  num? gender;
+  num? id;
   String? knownForDepartment;
   String? name;
   String? originalName;
