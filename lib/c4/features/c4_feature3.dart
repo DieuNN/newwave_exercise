@@ -1,6 +1,5 @@
 import 'package:bt_c3/c4/features/c4_feature1.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class C4Feature3 extends StatelessWidget {
   const C4Feature3({Key? key}) : super(key: key);
