@@ -41,7 +41,7 @@ class MovieFinderCasterCard extends StatelessWidget {
         fontFamily: "BeVietnamPro",
         fontSize: 10,
       ),
-      maxLines: 3,
+      maxLines: 2,
       overflow: TextOverflow.fade,
     );
   }

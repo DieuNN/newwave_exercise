@@ -1,9 +1,7 @@
-import 'dart:convert';
 
 import 'package:bt_c3/main.dart';
 import 'package:bt_c3/movie_finder/model/movie_cast_api_response.dart';
 import 'package:bt_c3/movie_finder/model/movie_primary_info_api_response.dart';
-import 'package:bt_c3/movie_finder/movie_constants.dart';
 import 'package:bt_c3/movie_finder/movie_finder_provider.dart';
 import 'package:bt_c3/movie_finder/ui/widget/caster_card.dart';
 import 'package:bt_c3/movie_finder/ui/widget/category_chip.dart';
@@ -13,7 +11,6 @@ import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:readmore/readmore.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:http/http.dart' as http;
 
 import '../../model/movie.dart';
 
@@ -288,7 +285,7 @@ class _MovieDetailPanelState extends State<MovieDetailPanel> {
       builder: (BuildContext context) {
         return AlertDialog(
           contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.zero,
+          insetPadding: const EdgeInsets.all(16),
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(32.0))),
           content: Container(
