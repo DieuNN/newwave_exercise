@@ -5,12 +5,12 @@ import 'package:flutter/widgets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class MovieCarousel extends StatefulWidget {
-  final bool expaned;
+  final bool expanded;
   final List<Movie> movieList;
 
   const MovieCarousel({
     Key? key,
-    required this.expaned,
+    required this.expanded,
     required this.movieList,
   }) : super(key: key);
 
@@ -33,8 +33,9 @@ class _MovieCarouselState extends State<MovieCarousel> {
     List<Widget> movieItemWidgets = widget.movieList
         .map(
           (item) => MovieCarouselItem(
-            expanded: widget.expaned,
+            expanded: widget.expanded,
             movie: item,
+            active: false,
           ),
         )
         .toList();
@@ -68,18 +69,24 @@ class _MovieCarouselState extends State<MovieCarousel> {
     );
   }
 
+  /// LOL Magic number here
   Widget carouselSlider(List<Widget> movieItemWidgets) {
-    return CarouselSlider(
-      items: movieItemWidgets,
+    return CarouselSlider.builder(
+      itemBuilder: (context, index, realIndex) {
+        return MovieCarouselItem(
+            expanded: widget.expanded,
+            movie: widget.movieList[index],
+            active: index == pageIndex);
+      },
       carouselController: carouselController,
       options: CarouselOptions(
-        viewportFraction: widget.expaned ? 0.7 : 0.4,
+        viewportFraction: widget.expanded ? 0.7 : 0.4,
         enlargeCenterPage: true,
         autoPlay: true,
         enlargeStrategy: CenterPageEnlargeStrategy.scale,
-        height: widget.expaned ? 141 : 214,
+        height: widget.expanded ? 141 : 214,
         enableInfiniteScroll: true,
-        autoPlayInterval: Duration(seconds: widget.expaned ? 3 : 4),
+        autoPlayInterval: Duration(seconds: widget.expanded ? 3 : 4),
         onPageChanged: (index, _) {
           setState(
             () {
@@ -88,6 +95,7 @@ class _MovieCarouselState extends State<MovieCarousel> {
           );
         },
       ),
+      itemCount: widget.movieList.length,
     );
   }
 }

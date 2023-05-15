@@ -74,7 +74,7 @@ class _MovieFinderState extends State<MovieFinder> {
               height: 15,
             ),
             MovieCarousel(
-              expaned: true,
+              expanded: true,
               key: UniqueKey(),
               movieList: context
                   .watch<MovieFinderProvider>()
@@ -112,7 +112,7 @@ class _MovieFinderState extends State<MovieFinder> {
                   .results!
                   .take(10)
                   .toList(),
-              expaned: false,
+              expanded: false,
               key: UniqueKey(),
             ),
             const SizedBox(
