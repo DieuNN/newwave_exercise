@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 class C5Screen2 extends StatelessWidget {
   final bool popBack;
-  final GlobalKey _key = GlobalKey();
 
   C5Screen2({Key? key, this.popBack = false}) : super(key: key);
   final TextEditingController editingController =
@@ -37,8 +36,7 @@ class C5Screen2 extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
                       child: Column(
                         children: [
-                          Image.asset("assets/images/marvel/marvel_logo.png",
-                              key: _key),
+                          Image.asset("assets/images/marvel/marvel_logo.png",),
                           const SizedBox(
                             height: 42,
                           ),
@@ -85,12 +83,6 @@ class C5Screen2 extends StatelessWidget {
                         Navigator.pop(context, editingController);
                         return;
                       }
-                      RenderBox box =
-                          _key.currentContext?.findRenderObject() as RenderBox;
-                      Offset position = box.localToGlobal(Offset.zero);
-                      logoPositions
-                          .add("Screen 2: X:${position.dx} : Y:${position.dy}");
-
                       Navigator.push(
                         context,
                         AppRoute.createPageRoute(

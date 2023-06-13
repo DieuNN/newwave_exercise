@@ -45,6 +45,16 @@ dependencies:
   carousel_slider: ^4.2.1
   carousel_indicator: ^1.0.6
   dots_indicator: ^2.1.0
+  card_swiper: ^2.0.4
+  smooth_page_indicator: ^1.0.1
+  neon_widgets: ^2.0.0
+  uuid: ^3.0.7
+  sliding_up_panel: ^2.0.0+1
+  readmore: ^2.2.0
+  test: ^1.22.0
+  http: ^0.13.5
+  shimmer: ^2.0.0
+  flutter_animated_dialog: ^2.0.1
 
 dev_dependencies:
   flutter_test:

@@ -1,18 +1,40 @@
 import 'package:bt_c3/main.dart';
+import 'package:bt_c3/movie_finder/movie_finder_provider.dart';
 import 'package:bt_c3/movie_finder/ui/widget/app_bar.dart';
 import 'package:bt_c3/movie_finder/ui/widget/bottom_navigation_bar.dart';
 import 'package:bt_c3/movie_finder/ui/widget/movie_carousel.dart';
-import 'package:bt_c3/movie_finder/ui/widget/movie_item.dart';
 import 'package:bt_c3/movie_finder/ui/widget/option_buttons.dart';
 import 'package:bt_c3/movie_finder/ui/widget/search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:scaffold_gradient_background/scaffold_gradient_background.dart';
 
-class MovieFinder extends StatelessWidget {
+class MovieFinder extends StatefulWidget {
   const MovieFinder({Key? key}) : super(key: key);
 
   @override
+  State<MovieFinder> createState() => _MovieFinderState();
+}
+
+class _MovieFinderState extends State<MovieFinder> {
+  @override
+  void initState() {
+    Provider.of<MovieFinderProvider>(context, listen: false).loadMovies();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!context.watch<MovieFinderProvider>().isMovieApiLoaded &&
+        context.watch<MovieFinderProvider>().movieApiResult == null) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator(),
+        ],
+      );
+    }
     return ScaffoldGradientBackground(
       gradient: LinearGradient(
         colors: [
@@ -52,8 +74,14 @@ class MovieFinder extends StatelessWidget {
               height: 15,
             ),
             MovieCarousel(
-              expaned: true,
+              expanded: true,
               key: UniqueKey(),
+              movieList: context
+                  .watch<MovieFinderProvider>()
+                  .movieApiResult!
+                  .results!
+                  .take(10)
+                  .toList(),
             ),
             const SizedBox(
               height: 20,
@@ -78,8 +106,17 @@ class MovieFinder extends StatelessWidget {
               height: 15,
             ),
             MovieCarousel(
-              expaned: false,
+              movieList: context
+                  .watch<MovieFinderProvider>()
+                  .movieApiResult!
+                  .results!
+                  .take(10)
+                  .toList(),
+              expanded: false,
               key: UniqueKey(),
+            ),
+            const SizedBox(
+              height: 16,
             ),
           ],
         ),

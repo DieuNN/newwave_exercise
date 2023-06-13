@@ -2,8 +2,10 @@ import 'package:bt_c3/c3/c3.dart';
 import 'package:bt_c3/c4/c4.dart';
 import 'package:bt_c3/c4/routes/app_route.dart';
 import 'package:bt_c3/movie_finder/movie_finder.dart';
+import 'package:bt_c3/movie_finder/movie_finder_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
 
 import 'c5/c5.dart';
 
@@ -28,29 +30,24 @@ class MyApp extends StatelessWidget {
       valueListenable: notifier,
       builder: (BuildContext context, ThemeMode value, Widget? child) {
         currentTheme = value;
-        return MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
-          themeMode: value,
-          home: const MyHomePage(),
-          debugShowCheckedModeBanner: false,
+        return ChangeNotifierProvider<MovieFinderProvider>(
+          create: (BuildContext context) => MovieFinderProvider(),
+          child: MaterialApp(
+            title: 'Flutter Demo',
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: value,
+            home: const MyHomePage(),
+            debugShowCheckedModeBanner: false,
+          ),
         );
       },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
-
-  @override
-  _MyHomePageState createState() {
-    return _MyHomePageState();
-  }
-}
-
-class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,7 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.push(
-                    context, AppRoute.createPageRoute(const MovieFinder()));
+                  context,
+                  AppRoute.createPageRoute(
+                    const MovieFinder(),
+                  ),
+                );
               },
               child: const Text("Movie finder"),
             ),

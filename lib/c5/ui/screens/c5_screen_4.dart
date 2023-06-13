@@ -12,7 +12,16 @@ class C5Screen4 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> texts = logoPositions.map((e) => Text(e)).toList();
+    List<Widget> texts = [];
+    for (int i = 0; i < textEditControllers.entries.length; i++) {
+      texts.add(
+        Text(
+          "Text ${i + 1} is ${textEditControllers.entries.toList()[i].value.text}",
+          style: const TextStyle(color: Colors.white),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -32,12 +41,7 @@ class C5Screen4 extends StatelessWidget {
                     top: 0,
                     right: 0,
                     child: Column(
-                      children: logoPositions
-                          .map((e) => Text(
-                                e,
-                                style: const TextStyle(color: Colors.white),
-                              ))
-                          .toList(),
+                      children: texts,
                     ),
                   ),
                   Positioned(
